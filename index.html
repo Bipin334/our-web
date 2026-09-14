@@ -21,7 +21,7 @@
   </section>
 
   <section id="experiment">
-    <h2>Experiment #2</h2>
+    <h2>Experiment #3</h2>
 
     <input id="userInput" type="text" placeholder="Type something">
 
@@ -35,9 +35,24 @@
   <script>
     function processInput() {
       let input = document.getElementById("userInput").value;
+      let message = input.toLowerCase();
 
-      document.getElementById("result").innerText =
-        "You typed: " + input;
+      if (message === "hello") {
+        document.getElementById("result").innerText =
+          "Hello! 👋";
+      } 
+      else if (message === "how are you") {
+        document.getElementById("result").innerText =
+          "I'm ready to build! 🚀";
+      } 
+      else if (message === "bye") {
+        document.getElementById("result").innerText =
+          "See you! 👋";
+      } 
+      else {
+        document.getElementById("result").innerText =
+          "I don't understand yet.";
+      }
     }
   </script>
 
