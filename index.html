@@ -5,11 +5,36 @@
 </head>
 
 <body>
-  <h1>Our Web v0.1</h1>
-  <p>Build • Test • Upgrade</p>
 
-  <button onclick="alert('Hello from our first web!')">
-    START
-  </button>
+  <h1>OUR WEB</h1>
+
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#experiment">Experiment</a>
+  </nav>
+
+  <hr>
+
+  <section id="home">
+    <h2>Welcome to Our Web</h2>
+    <p>Build • Test • Upgrade</p>
+  </section>
+
+  <section id="experiment">
+    <h2>Experiment</h2>
+    <button onclick="startExperiment()">
+      START
+    </button>
+
+    <p id="result"></p>
+  </section>
+
+  <script>
+    function startExperiment() {
+      document.getElementById("result").innerText =
+        "🚀 Experiment #1 Started!";
+    }
+  </script>
+
 </body>
 </html>
