@@ -21,7 +21,7 @@
   </section>
 
   <section id="experiment">
-    <h2>Experiment #5</h2>
+    <h2>Experiment #6</h2>
 
     <input id="userInput" type="text" placeholder="Type something">
 
@@ -31,21 +31,45 @@
   </section>
 
   <script>
+    let userName = "";
+
     function processInput() {
       let input = document.getElementById("userInput").value;
       let message = input.toLowerCase().trim();
 
-      if (
+      if (message.startsWith("my name is ")) {
+
+        userName = input.substring(11).trim();
+
+        document.getElementById("result").innerText =
+          "Nice to meet you, " + userName + "! 👋";
+
+      } else if (
+        message.includes("what is my name") ||
+        message.includes("what's my name")
+      ) {
+
+        if (userName !== "") {
+          document.getElementById("result").innerText =
+            "Your name is " + userName + "! 🧠";
+        } else {
+          document.getElementById("result").innerText =
+            "You haven't told me your name yet.";
+        }
+
+      } else if (
         message.includes("hello") ||
         message.includes("hi") ||
         message.includes("hey")
       ) {
+
         document.getElementById("result").innerText =
           "Hello! 👋";
 
       } else if (
         message.includes("how are you")
       ) {
+
         document.getElementById("result").innerText =
           "I'm ready to build! 🚀";
 
@@ -53,6 +77,7 @@
         message.includes("your name") ||
         message.includes("what is your name")
       ) {
+
         document.getElementById("result").innerText =
           "I'm Our Web! 🤖";
 
@@ -60,10 +85,12 @@
         message.includes("bye") ||
         message.includes("goodbye")
       ) {
+
         document.getElementById("result").innerText =
           "See you! 👋";
 
       } else {
+
         document.getElementById("result").innerText =
           "I don't understand yet.";
       }
