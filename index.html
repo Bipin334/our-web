@@ -21,18 +21,23 @@
   </section>
 
   <section id="experiment">
-    <h2>Experiment</h2>
-    <button onclick="startExperiment()">
-      START
+    <h2>Experiment #2</h2>
+
+    <input id="userInput" type="text" placeholder="Type something">
+
+    <button onclick="processInput()">
+      SEND
     </button>
 
     <p id="result"></p>
   </section>
 
   <script>
-    function startExperiment() {
+    function processInput() {
+      let input = document.getElementById("userInput").value;
+
       document.getElementById("result").innerText =
-        "🚀 Experiment #1 Started!";
+        "You typed: " + input;
     }
   </script>
 
