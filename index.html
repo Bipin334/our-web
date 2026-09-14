@@ -21,7 +21,7 @@
   </section>
 
   <section id="experiment">
-    <h2>Experiment #4</h2>
+    <h2>Experiment #5</h2>
 
     <input id="userInput" type="text" placeholder="Type something">
 
@@ -36,30 +36,29 @@
       let message = input.toLowerCase().trim();
 
       if (
-        message === "hello" ||
-        message === "hi" ||
-        message === "hey"
+        message.includes("hello") ||
+        message.includes("hi") ||
+        message.includes("hey")
       ) {
         document.getElementById("result").innerText =
           "Hello! 👋";
 
       } else if (
-        message === "how are you" ||
-        message === "how r you"
+        message.includes("how are you")
       ) {
         document.getElementById("result").innerText =
           "I'm ready to build! 🚀";
 
       } else if (
-        message === "what is your name" ||
-        message === "your name"
+        message.includes("your name") ||
+        message.includes("what is your name")
       ) {
         document.getElementById("result").innerText =
           "I'm Our Web! 🤖";
 
       } else if (
-        message === "bye" ||
-        message === "goodbye"
+        message.includes("bye") ||
+        message.includes("goodbye")
       ) {
         document.getElementById("result").innerText =
           "See you! 👋";
