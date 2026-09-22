@@ -1,0 +1,201 @@
+# ============================================================
+# HAMARA AI - Tiny Generative AI
+# Version 0.1
+# ============================================================
+
+import re
+import random
+import math
+
+
+# ============================================================
+# 1. AI RULES
+# ============================================================
+
+RULES = {
+    "language": "hinglish",
+    "personality": "friendly",
+    "max_reply_tokens": 40,
+    "use_context": True,
+}
+
+
+# ============================================================
+# 2. APNA TRAINING DATA
+# ============================================================
+
+TRAINING_TEXT = """
+namaste bhai kaise ho
+main theek hoon bhai tum kaise ho
+aaj kya kar rahe ho
+main tumse baat kar raha hoon
+tumhara naam kya hai
+mera naam hamara ai hai
+ai kya hota hai
+ai ek computer system hai jo language ke patterns seekh sakta hai
+mujhe coding seekhni hai
+coding seekhna ek step by step process hai
+tension mat lo dheere dheere seekhenge
+kya haal hai
+sab badhiya hai
+aaj mausam achha hai
+mujhe game khelna pasand hai
+gaming mein practice important hoti hai
+"""
+
+
+# ============================================================
+# 3. TOKENIZER
+# ============================================================
+
+def tokenize(text):
+    text = text.lower()
+
+    # Words + basic punctuation
+    return re.findall(r"[a-zA-Z0-9']+|[.,!?]", text)
+
+
+tokens = tokenize(TRAINING_TEXT)
+
+vocab = sorted(set(tokens))
+
+word_to_id = {
+    word: i
+    for i, word in enumerate(vocab)
+}
+
+id_to_word = {
+    i: word
+    for word, i in word_to_id.items()
+}
+
+
+# ============================================================
+# 4. TRAINING PAIRS
+# ============================================================
+
+training_pairs = []
+
+for i in range(len(tokens) - 1):
+
+    current_word = tokens[i]
+    next_word = tokens[i + 1]
+
+    training_pairs.append(
+        (
+            word_to_id[current_word],
+            word_to_id[next_word]
+        )
+    )
+
+
+# ============================================================
+# 5. SIMPLE LANGUAGE MODEL
+# ============================================================
+
+# Important:
+# Ye abhi tiny prototype hai.
+# Har word ke baad kaunsa word aaya,
+# us pattern ko learn karta hai.
+
+model = {}
+
+for current_id, next_id in training_pairs:
+
+    if current_id not in model:
+        model[current_id] = {}
+
+    if next_id not in model[current_id]:
+        model[current_id][next_id] = 0
+
+    model[current_id][next_id] += 1
+
+
+# ============================================================
+# 6. LEARNED NEXT WORD
+# ============================================================
+
+def predict_next(current_id):
+
+    choices = model.get(current_id)
+
+    if not choices:
+        return random.choice(list(id_to_word.keys()))
+
+    words = list(choices.keys())
+    weights = list(choices.values())
+
+    return random.choices(
+        words,
+        weights=weights,
+        k=1
+    )[0]
+
+
+# ============================================================
+# 7. GENERATE RESPONSE
+# ============================================================
+
+def generate_response(user_text):
+
+    user_tokens = tokenize(user_text)
+
+    if not user_tokens:
+        return "Kuch bolo bhai 😄"
+
+    # Last known word se generation start
+    current_word = user_tokens[-1]
+
+    if current_word not in word_to_id:
+        current_word = random.choice(vocab)
+
+    current_id = word_to_id[current_word]
+
+    response = []
+
+    for _ in range(RULES["max_reply_tokens"]):
+
+        next_id = predict_next(current_id)
+
+        next_word = id_to_word[next_id]
+
+        response.append(next_word)
+
+        current_id = next_id
+
+        # Stop at punctuation
+        if next_word in [".", "!", "?"]:
+            break
+
+    return " ".join(response)
+
+
+# ============================================================
+# 8. CHAT
+# ============================================================
+
+print("=" * 45)
+print("🤖 HAMARA AI v0.1")
+print("=" * 45)
+
+print("AI Rules:")
+print("Language   :", RULES["language"])
+print("Personality:", RULES["personality"])
+print()
+
+print("Hamara AI ready hai.")
+print("Band karne ke liye: exit")
+print()
+
+
+while True:
+
+    user = input("You: ")
+
+    if user.lower() == "exit":
+        print("AI: Bye bhai 👋")
+        break
+
+    answer = generate_response(user)
+
+    print("AI:", answer)
