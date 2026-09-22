@@ -1,0 +1,264 @@
+# hamara_ai.py
+# Tiny neural language model — from scratch
+# No API, no ChatGPT/OpenAI model
+
+import math
+import random
+import re
+
+# =========================
+# RULES — yahan tum edit kar sakte ho
+# =========================
+
+RULES = {
+    "language": "hinglish",
+    "personality": "friendly",
+    "max_chars": 120
+}
+
+# Apna training data yahan badhao.
+# Ye examples model ko language/pattern seekhne ke liye diye ja rahe hain.
+TRAINING_TEXT = """
+hello kya haal hai
+main theek hoon tum kaise ho
+main ek chhota ai hoon
+mujhe coding pasand hai
+coding se hum apna project bana sakte hain
+aaj mausam achha hai
+tum kya kar rahe ho
+main tumhari baat sun raha hoon
+haan bilkul
+nahi mujhe nahi pata
+ye ek interesting question hai
+chalo coding karte hain
+hamara ai khud text generate karega
+machine learning mein model data se patterns seekhta hai
+"""
+
+# =========================
+# TOKENIZER
+# =========================
+
+def tokenize(text):
+    return re.findall(r"[a-zA-Z0-9']+|[.,!?]", text.lower())
+
+
+tokens = tokenize(TRAINING_TEXT)
+
+vocab = sorted(set(tokens))
+word_to_id = {w: i for i, w in enumerate(vocab)}
+id_to_word = {i: w for w, i in word_to_id.items()}
+
+V = len(vocab)
+
+# =========================
+# TRAINING PAIRS
+# =========================
+
+pairs = []
+
+for i in range(len(tokens) - 1):
+    x = word_to_id[tokens[i]]
+    y = word_to_id[tokens[i + 1]]
+    pairs.append((x, y))
+
+
+# =========================
+# NEURAL NETWORK
+# =========================
+
+random.seed(42)
+
+EMBED = 12
+
+# Input embedding
+W1 = [
+    [random.uniform(-0.5, 0.5) for _ in range(EMBED)]
+    for _ in range(V)
+]
+
+# Output weights
+W2 = [
+    [random.uniform(-0.5, 0.5) for _ in range(V)]
+    for _ in range(EMBED)
+]
+
+B = [0.0 for _ in range(V)]
+
+
+def softmax(values):
+
+    m = max(values)
+    exps = [math.exp(v - m) for v in values]
+
+    total = sum(exps)
+
+    return [x / total for x in exps]
+
+
+# =========================
+# TRAIN
+# =========================
+
+LEARNING_RATE = 0.05
+EPOCHS = 300
+
+
+print("AI training start...")
+
+for epoch in range(EPOCHS):
+
+    total_loss = 0
+
+    random.shuffle(pairs)
+
+    for x, target in pairs:
+
+        # Forward pass
+
+        hidden = W1[x][:]
+
+        logits = []
+
+        for j in range(V):
+
+            value = B[j]
+
+            for k in range(EMBED):
+                value += hidden[k] * W2[k][j]
+
+            logits.append(value)
+
+        probs = softmax(logits)
+
+        loss = -math.log(max(probs[target], 1e-12))
+        total_loss += loss
+
+        # Gradient
+
+        grad = probs[:]
+        grad[target] -= 1
+
+        # Update output weights
+
+        for k in range(EMBED):
+
+            for j in range(V):
+
+                W2[k][j] -= LEARNING_RATE * hidden[k] * grad[j]
+
+        # Update bias
+
+        for j in range(V):
+            B[j] -= LEARNING_RATE * grad[j]
+
+        # Update embedding
+
+        for k in range(EMBED):
+
+            error = 0
+
+            for j in range(V):
+                error += W2[k][j] * grad[j]
+
+            W1[x][k] -= LEARNING_RATE * error
+
+
+    if epoch % 50 == 0:
+        print("Epoch:", epoch, "Loss:", round(total_loss, 2))
+
+
+print("Training complete!")
+
+
+# =========================
+# GENERATION
+# =========================
+
+def predict_next(word):
+
+    if word not in word_to_id:
+        word = random.choice(vocab)
+
+    x = word_to_id[word]
+
+    hidden = W1[x]
+
+    logits = []
+
+    for j in range(V):
+
+        value = B[j]
+
+        for k in range(EMBED):
+            value += hidden[k] * W2[k][j]
+
+        logits.append(value)
+
+    probs = softmax(logits)
+
+    # Random sampling
+    r = random.random()
+    total = 0
+
+    for i, p in enumerate(probs):
+
+        total += p
+
+        if r <= total:
+            return id_to_word[i]
+
+    return id_to_word[-1]
+
+
+def generate_response(user_text):
+
+    user_tokens = tokenize(user_text)
+
+    if user_tokens:
+        current = user_tokens[-1]
+    else:
+        current = random.choice(vocab)
+
+    result = []
+
+    for _ in range(RULES["max_chars"]):
+
+        next_word = predict_next(current)
+
+        result.append(next_word)
+
+        current = next_word
+
+        sentence = " ".join(result)
+
+        if len(sentence) >= RULES["max_chars"]:
+            break
+
+    return " ".join(result)
+
+
+# =========================
+# CHAT
+# =========================
+
+print()
+print("================================")
+print("       HAMARA AI v0.2")
+print("================================")
+print("Language :", RULES["language"])
+print("Personality :", RULES["personality"])
+print("Type 'exit' to stop.")
+print()
+
+while True:
+
+    user = input("You: ")
+
+    if user.lower() == "exit":
+        print("AI: Bye!")
+        break
+
+    reply = generate_response(user)
+
+    print("AI:", reply)
